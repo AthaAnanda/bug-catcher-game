@@ -1,27 +1,24 @@
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
     public float moveSpeed = 5f;
-
-    private Rigidbody rb;
-    private Vector3 movement;
+    private Rigidbody2D rb;
+    private Vector2 move;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody2D>();
     }
 
     void Update()
     {
-        float moveX = Input.GetAxis("Horizontal");  // A/D atau kiri/kanan
-        float moveZ = Input.GetAxis("Vertical");    // W/S atau atas/bawah
-
-        movement = new Vector3(moveX, 0, moveZ);
+        move.x = Input.GetAxisRaw("Horizontal");
+        move.y = Input.GetAxisRaw("Vertical");
     }
 
     void FixedUpdate()
     {
-        rb.MovePosition(rb.position + movement * moveSpeed * Time.fixedDeltaTime);
+        rb.MovePosition(rb.position + move * moveSpeed * Time.fixedDeltaTime);
     }
 }

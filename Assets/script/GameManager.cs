@@ -1,73 +1,114 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    [Header("UI & Data")]
-    public GameObject menuPanel;
-    public GameObject gamePanel;
-    public GameObject pausePanel;
-    public Text healthText;
-    public Text scoreText;
-    public Slider volumeSlider;
+    [Header("UI")]
+    public Text healthText, scoreText, timerText;
+    public GameObject gameOverPanel;
+    public Button restartButton, exitButton;
 
     [Header("Gameplay")]
     public int maxHealth = 3;
-    private int health;
-    private int score;
+    public float gameTime = 60f; // default
+    public AudioClip collectSound, hurtSound;
 
-    [Header("Audio")]
-    public AudioSource bgmSource;
-    public AudioClip collectSound;
-    public AudioClip hurtSound;
+    private int health, score;
+    private float currentTime;
 
     void Awake()
     {
         if (instance == null)
+        {
             instance = this;
-        else
-            Destroy(gameObject);
-
-        DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(gameObject);
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+        else Destroy(gameObject);
     }
 
     void Start()
     {
-        MainMenu();
-        volumeSlider.onValueChanged.AddListener(SetVolume);
+        if (SceneManager.GetActiveScene().name.StartsWith("Level"))
+        {
+            InitGameplay();
+        }
+
+        if (restartButton != null)
+            restartButton.onClick.AddListener(RestartGame);
+
+        if (exitButton != null)
+            exitButton.onClick.AddListener(ExitGame);
     }
 
-    public void StartGame()
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        if (scene.name.StartsWith("Level"))
+        {
+            InitGameplay();
+
+            if (gameOverPanel != null)
+                gameOverPanel.SetActive(false);
+        }
+    }
+
+    void InitGameplay()
+    {
+        Time.timeScale = 1;
         health = maxHealth;
         score = 0;
+
+        // ✅ Atur waktu berdasarkan nama level
+        switch (SceneManager.GetActiveScene().name)
+        {
+            case "Level1":
+                gameTime = 60f; break;
+            case "Level2":
+                gameTime = 90f; break;
+            case "Level3":
+                gameTime = 120f; break;
+            default:
+                gameTime = 60f; break;
+        }
+
+        currentTime = gameTime;
+
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
+
+        StartCoroutine(TimerCountdown());
         UpdateUI();
-        menuPanel.SetActive(false);
-        gamePanel.SetActive(true);
-        SceneManager.LoadScene("Level1");
     }
 
-    public void UpdateUI()
+    IEnumerator TimerCountdown()
     {
-        healthText.text = "❤️ " + health.ToString();
-        scoreText.text = "Poin: " + score.ToString();
+        while (currentTime > 0)
+        {
+            currentTime -= Time.deltaTime;
+            UpdateUI();
+            yield return null;
+        }
+        GameOver();
     }
 
     public void AddScore(int amount)
     {
         score += amount;
         UpdateUI();
-        AudioSource.PlayClipAtPoint(collectSound, Camera.main.transform.position);
+        if (collectSound)
+            AudioSource.PlayClipAtPoint(collectSound, Camera.main.transform.position);
     }
 
     public void TakeDamage(int amount)
     {
         health -= amount;
         UpdateUI();
-        AudioSource.PlayClipAtPoint(hurtSound, Camera.main.transform.position);
+        if (hurtSound)
+            AudioSource.PlayClipAtPoint(hurtSound, Camera.main.transform.position);
 
         if (health <= 0)
         {
@@ -75,40 +116,34 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void UpdateUI()
+    {
+        if (healthText) healthText.text = "❤️: " + health;
+        if (scoreText) scoreText.text = "Poin: " + score;
+        if (timerText)
+        {
+            int m = Mathf.FloorToInt(currentTime / 60);
+            int s = Mathf.FloorToInt(currentTime % 60);
+            timerText.text = $"TIMER {m:00}:{s:00}";
+        }
+    }
+
     public void GameOver()
     {
-        SceneManager.LoadScene("MainMenu");
-    }
-
-    public void NextLevel()
-    {
-        int nextScene = SceneManager.GetActiveScene().buildIndex + 1;
-        if (nextScene < SceneManager.sceneCountInBuildSettings)
-            SceneManager.LoadScene(nextScene);
-    }
-
-    public void PauseGame()
-    {
         Time.timeScale = 0;
-        pausePanel.SetActive(true);
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(true);
     }
 
-    public void ResumeGame()
+    public void RestartGame()
     {
         Time.timeScale = 1;
-        pausePanel.SetActive(false);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    public void MainMenu()
+    public void ExitGame()
     {
         Time.timeScale = 1;
         SceneManager.LoadScene("MainMenu");
-        menuPanel.SetActive(true);
-        gamePanel.SetActive(false);
-    }
-
-    public void SetVolume(float value)
-    {
-        AudioListener.volume = value;
     }
 }

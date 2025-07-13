@@ -39,6 +39,8 @@ public class BugDetector : MonoBehaviour
 
     public void ClosePanel()
     {
-        if (infoPanel != null) infoPanel.SetActive(false);
+        if (infoPanel != null)
+            infoPanel.SetActive(false);
     }
+
 }

@@ -9,7 +9,7 @@ public class BugDetector : MonoBehaviour
 
     void Start()
     {
-        infoPanel.SetActive(false); // Sembunyikan panel saat awal
+        infoPanel.SetActive(false);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -18,6 +18,7 @@ public class BugDetector : MonoBehaviour
         if (bug != null)
         {
             ShowBugInfo(bug);
+            infoPanel.SetActive(true); // tampilkan panel info saat menyentuh
         }
     }
 

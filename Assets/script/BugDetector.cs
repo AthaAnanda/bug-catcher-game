@@ -7,9 +7,9 @@ public class BugDetector : MonoBehaviour
     public Text bugNameText;
     public Text bugDescriptionText;
 
-    void Start()
+    private void Start()
     {
-        infoPanel.SetActive(false);
+        infoPanel.SetActive(false); // Sembunyikan di awal
     }
 
     private void OnTriggerEnter(Collider other)
@@ -18,18 +18,27 @@ public class BugDetector : MonoBehaviour
         if (bug != null)
         {
             ShowBugInfo(bug);
-            infoPanel.SetActive(true); // tampilkan panel info saat menyentuh
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        BugInfo bug = other.GetComponent<BugInfo>();
+        if (bug != null)
+        {
+            ClosePanel();
         }
     }
 
     void ShowBugInfo(BugInfo bug)
     {
-        bugNameText.text = bug.bugName;
-        bugDescriptionText.text = bug.bugDescription;
+        if (bugNameText != null) bugNameText.text = bug.bugName;
+        if (bugDescriptionText != null) bugDescriptionText.text = bug.bugDescription;
+        if (infoPanel != null) infoPanel.SetActive(true);
     }
 
     public void ClosePanel()
     {
-        infoPanel.SetActive(false);
+        if (infoPanel != null) infoPanel.SetActive(false);
     }
 }

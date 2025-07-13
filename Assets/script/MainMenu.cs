@@ -1,26 +1,14 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
-    public void StartGame()
+    public void OnStartGame()
     {
-        SceneManager.LoadScene("Game"); // Pastikan ada scene bernama "Game"
+        GameManager.instance.StartGame();
     }
 
-    public void LoadGame()
-    {
-        SceneManager.LoadScene("LoadGame"); // Bisa kamu buat nanti
-    }
-
-    public void OpenSettings()
-    {
-        SceneManager.LoadScene("Settings"); // Pastikan ada scene Settings
-    }
-
-    public void QuitGame()
-    {
-        Debug.Log("Game Quit");
-        Application.Quit(); // Ini hanya akan bekerja di versi Build, bukan di Editor
-    }
+    // public void OnQuitGame()
+    // {
+    //     GameManager.instance.QuitGame();
+    // }
 }
